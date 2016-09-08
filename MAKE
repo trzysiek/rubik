@@ -1,0 +1,1 @@
+g++ -std=c++11 face_2d.cpp -c
