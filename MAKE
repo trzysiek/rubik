@@ -1,5 +1,6 @@
 rm *.o
+g++ -Wall -std=c++11 turn.cpp -c
 g++ -Wall -std=c++11 util.cpp -c
 g++ -Wall -std=c++11 face_2d.cpp -c
 g++ -Wall -std=c++11 cube.cpp -c
-g++ -Wall -std=c++11 rubik.cpp cube.o face_2d.o util.o -o rubik
+g++ -Wall -std=c++11 rubik.cpp cube.o face_2d.o util.o turn.o -o rubik

@@ -2,6 +2,8 @@
 #define __cube_h__
 
 #include "face_2d.h"
+#include "util.h"
+#include "turn.h"
 
 #include <vector>
 #include <iostream>
@@ -12,10 +14,38 @@ struct Cubixon {
     Color& operator[](int nr) {
         return colors[nr];
     }
+    void println() const {
+        for (unsigned int i = 0; i < colors.size(); ++i)
+            printf("%c ", color_to_char(colors[i]));
+        printf("\n");
+    }
 };
 
+
 class Cube {
+  public:
+    std::vector<Face_2d> faces_2d; // list of faces (human-like represantation of cube)
+    std::vector<Cubixon> cubixons_3d; // list of 27 (most likely) 1x1x1 cubixons
+
+    Cube() {};
+    Cube(std::vector<Face_2d> faces) : faces_2d(faces) {
+        for (int i = 1; i <= 27; ++i)
+            cubixons_3d.push_back(get_cubixon(faces, i));
+    };
+
+    // perform one single turn
+    void move(int turn_nr);
+
+    void print(std::ostream& os) const;
+    void print_cubixons() const;
+
+    void cubixons_to_faces();
+    void move_cubixon(unsigned int a, unsigned int b);
+
+    Cube get_default_cube();
+
   private:
+    const unsigned int TURN_CUBIXONS_NUM = 8;
     static Cubixon get_cubixon(std::vector<Face_2d>& faces, int nr);
 
     const Cubixon cubixon01 = {{Color::Y, Color::B, Color::O}};
@@ -38,15 +68,15 @@ class Cube {
     const Cubixon cubixon17 = {{Color::R}};
     const Cubixon cubixon18 = {{Color::B, Color::W}};
 
-    const Cubixon cubixon19 = {{Color::W, Color::O, Color::G}};
-    const Cubixon cubixon20 = {{Color::B, Color::O}};
-    const Cubixon cubixon21 = {{Color::B, Color::R, Color::W}};
-    const Cubixon cubixon22 = {{Color::R, Color::G}};
+    const Cubixon cubixon19 = {{Color::B, Color::O, Color::W}};
+    const Cubixon cubixon20 = {{Color::W, Color::G}};
+    const Cubixon cubixon21 = {{Color::W, Color::R, Color::G}};
+    const Cubixon cubixon22 = {{Color::G, Color::O}};
     const Cubixon cubixon23 = {{Color::W}};
-    const Cubixon cubixon24 = {{Color::G, Color::O}};
-    const Cubixon cubixon25 = {{Color::R, Color::W, Color::G}};
-    const Cubixon cubixon26 = {{Color::W, Color::G}};
-    const Cubixon cubixon27 = {{Color::O, Color::B, Color::W}};
+    const Cubixon cubixon24 = {{Color::R, Color::G}};
+    const Cubixon cubixon25 = {{Color::R, Color::B, Color::W}};
+    const Cubixon cubixon26 = {{Color::B, Color::O}};
+    const Cubixon cubixon27 = {{Color::O, Color::W, Color::G}};
 
     const std::vector<Cubixon> cubixons = {
         cubixon01, cubixon02, cubixon03, cubixon04, cubixon05, cubixon06,
@@ -57,19 +87,6 @@ class Cube {
     };
 
     static std::vector<std::vector<std::pair<int, int>>> cubixons_to_2d;
-  public:
-    std::vector<Face_2d> faces_2d;
-    std::vector<Cubixon> cubixons_3d;
-
-    Cube(std::vector<Face_2d> faces) : faces_2d(faces) {
-        for (int i = 1; i <= 27; ++i)
-            cubixons_3d.push_back(get_cubixon(faces, i));
-    };
-    Cube() {};
-    void print(std::ostream& os) const;
-    void cubixons_to_faces();
-
-    Cube get_default_cube();
 };
 
 #endif // __cube_h__

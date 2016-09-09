@@ -52,6 +52,9 @@ int main() {
     try {
         Cube c = load_cube_from_file_or_input();
         std::cout << c;
+        //c.print_cubixons();
+        c.move(1);
+        //c.print_cubixons();
         c.cubixons_to_faces();
         std::cout << c;
     }
