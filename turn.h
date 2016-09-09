@@ -25,6 +25,7 @@ class Turn {
   public:
     static const Move_Table move_table;
     static const std::vector<int> turn1;
+    static const unsigned int turns_nr;
 };
 
 #endif // turn.h

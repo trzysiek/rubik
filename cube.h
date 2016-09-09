@@ -14,10 +14,17 @@ struct Cubixon {
     Color& operator[](int nr) {
         return colors[nr];
     }
-    void println() const {
-        for (unsigned int i = 0; i < colors.size(); ++i)
+    void println(bool space) const {
+        const int spaces_nr = 10;
+
+        if (space) printf(" ");
+        int spaces = spaces_nr;
+        for (int i = 0; i < (int)colors.size(); ++i) {
             printf("%c ", color_to_char(colors[i]));
-        printf("\n");
+            spaces -= 2;
+        }
+        while (spaces --)
+            printf(" ");
     }
 };
 
@@ -26,15 +33,28 @@ class Cube {
   public:
     std::vector<Face_2d> faces_2d; // list of faces (human-like represantation of cube)
     std::vector<Cubixon> cubixons_3d; // list of 27 (most likely) 1x1x1 cubixons
+    std::vector<Face_2d> restr; // restrictions
 
     Cube() {};
     Cube(std::vector<Face_2d> faces) : faces_2d(faces) {
         for (int i = 1; i <= 27; ++i)
             cubixons_3d.push_back(get_cubixon(faces, i));
     };
+    Cube(const Cube& c) : faces_2d(c.faces_2d) {
+        for (int i = 1; i <= 27; ++i)
+            cubixons_3d.push_back(get_cubixon(c.faces_2d, i));
+    }
+    Cube& operator=(Cube c) {
+        faces_2d = c.faces_2d;
+        cubixons_3d = c.cubixons_3d;
+        restr = c.restr;
+        return *this;
+    }
 
     // perform one single turn
-    void move(int turn_nr);
+    static Cube move(Cube c, int turn_nr);
+    int bfs(std::vector<Face_2d> restr);
+    int bfs();
 
     void print(std::ostream& os) const;
     void print_cubixons() const;
@@ -45,8 +65,10 @@ class Cube {
     Cube get_default_cube();
 
   private:
-    const unsigned int TURN_CUBIXONS_NUM = 8;
-    static Cubixon get_cubixon(std::vector<Face_2d>& faces, int nr);
+    int hash();
+
+    static const unsigned int TURN_CUBIXONS_NUM;
+    static Cubixon get_cubixon(std::vector<Face_2d> faces, int nr);
 
     const Cubixon cubixon01 = {{Color::Y, Color::B, Color::O}};
     const Cubixon cubixon02 = {{Color::Y, Color::O}};

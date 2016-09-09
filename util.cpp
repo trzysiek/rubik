@@ -11,11 +11,11 @@ Color char_to_color(char c) {
 }
 
 char color_to_char(Color c) {
-    if (c == Color::G) return 'g';
-    if (c == Color::R) return 'r';
-    if (c == Color::W) return 'w';
-    if (c == Color::O) return 'o';
-    if (c == Color::Y) return 'y';
-    if (c == Color::B) return 'b';
+    if (c == Color::G) return 'G';
+    if (c == Color::R) return 'R';
+    if (c == Color::W) return 'W';
+    if (c == Color::O) return 'O';
+    if (c == Color::Y) return 'Y';
+    if (c == Color::B) return 'B';
     throw new std::runtime_error("color_to_char");
 }

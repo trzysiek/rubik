@@ -2,6 +2,11 @@
 #include "util.h"
 #include "turn.h"
 
+#include <queue>
+#include <map>
+
+const unsigned int Cube::TURN_CUBIXONS_NUM = 8;
+
 std::vector<std::vector<std::pair<int, int>>> Cube::cubixons_to_2d = {
     {{0, 0}, {2, 0}, {4, 2}},
     {{0, 1}, {4, 1}},
@@ -37,16 +42,13 @@ std::vector<std::vector<std::pair<int, int>>> Cube::cubixons_to_2d = {
 void Cube::move_cubixon(unsigned int a, unsigned int b) {
     unsigned int size = cubixons_3d[a].colors.size();
     cubixons_3d[b].colors.resize(size);
-    //std::cerr << a << " " << b << ": ";
     auto which = Turn::move_table.table.at({a, b});
     for (unsigned int i = 0; i < size; ++i) {
-        //std::cerr << which[i] << " ";
         cubixons_3d[b][which[i]] = cubixons_3d[a][i];
     }
-    //std::cerr << std::endl;
 }
 
-void Cube::move(int turn_nr) {
+Cube Cube::move(Cube c, int turn_nr) {
     std::vector<int> turn;
     if (turn_nr == 1)
         turn = Turn::turn1;
@@ -54,26 +56,69 @@ void Cube::move(int turn_nr) {
     else
         throw new std::exception();
 
-    std::cerr << "Obrocik nr " << turn_nr << "." << std::endl;
+    Cube cube(c);
+    //std::cerr << "Obrocik nr " << turn_nr << "." << std::endl;
 
-    int last_i = TURN_CUBIXONS_NUM - 1;
-    Cubixon a = cubixons_3d[turn[last_i]];
-    Cubixon b = cubixons_3d[turn[last_i - 1]];
+    int last_i = Cube::TURN_CUBIXONS_NUM - 1;
+    Cubixon a = cube.cubixons_3d[turn[last_i]];
+    Cubixon b = cube.cubixons_3d[turn[last_i - 1]];
 
     // move all but last 2 cubixons
     for (int i = last_i - 2; i >= 0; i--)
-        move_cubixon(turn[i], turn[i + 2]);
-    Cubixon a2 = cubixons_3d[turn[last_i]];
-    Cubixon b2 = cubixons_3d[turn[last_i - 1]];
-    cubixons_3d[turn[last_i]]     = a;
-    cubixons_3d[turn[last_i - 1]] = b;
+        cube.move_cubixon(turn[i], turn[i + 2]);
+    Cubixon a2 = cube.cubixons_3d[turn[last_i]];
+    Cubixon b2 = cube.cubixons_3d[turn[last_i - 1]];
+    cube.cubixons_3d[turn[last_i]]     = a;
+    cube.cubixons_3d[turn[last_i - 1]] = b;
     
     // move last 2 cubixons
-    move_cubixon(turn[last_i],   turn[1]);
-    move_cubixon(turn[last_i-1], turn[0]);
+    cube.move_cubixon(turn[last_i],   turn[1]);
+    cube.move_cubixon(turn[last_i-1], turn[0]);
 
-    cubixons_3d[turn[last_i]]     = a2;
-    cubixons_3d[turn[last_i - 1]] = b2;
+    cube.cubixons_3d[turn[last_i]]     = a2;
+    cube.cubixons_3d[turn[last_i - 1]] = b2;
+    cube.cubixons_to_faces();
+    return cube;
+}
+
+int Cube::bfs(std::vector<Face_2d> restr) {
+    std::map<int, int> dist;
+    std::queue<Cube> q;
+
+    q.push(*this);
+    dist[hash()] = 0;
+    while (!q.empty()) {
+        Cube c = q.front(); q.pop();
+        std::cerr << c.hash() << ", " << dist[c.hash()] << std::endl;
+        c.print_cubixons();
+        for (unsigned int i = 1; i <= 1; ++i) {
+            Cube c_t = Cube::move(c, i);
+            int h = c_t.hash();
+            if (dist.count(h) == 0) {
+                dist[h] = dist[c.hash()] + 1;
+                q.push(c_t);
+            }
+            else
+                std::cerr << "cant: " << h << std::endl;
+        }
+    }
+    return 101;
+}
+
+int Cube::bfs() {
+    return bfs({});
+}
+
+int Cube::hash() {
+    static const int P = 97;
+
+    int res = 0;
+    for (const auto& f : faces_2d) {
+        for (const auto& p : f.colors) {
+            res = (res * P) + p;
+        }
+    }
+    return res;
 }
 
 Cube Cube::get_default_cube() {
@@ -86,7 +131,7 @@ Cube Cube::get_default_cube() {
     return Cube({Face_2d(f1), Face_2d(f2), Face_2d(f3), Face_2d(f4), Face_2d(f5), Face_2d(f6)});
 }
 
-Cubixon Cube::get_cubixon(std::vector<Face_2d>& faces, int nr) {
+Cubixon Cube::get_cubixon(std::vector<Face_2d> faces, int nr) {
     Cubixon c;
     for (const auto& cub : cubixons_to_2d[nr - 1]) {
         int f = cub.first; // face
@@ -97,7 +142,7 @@ Cubixon Cube::get_cubixon(std::vector<Face_2d>& faces, int nr) {
 }
 
 void Cube::cubixons_to_faces() {
-    printf("Zamieniam cubixy na mape 2d. Cubixow: %d.\n\n", (int)cubixons_3d.size());
+    //printf("Zamieniam cubixy na mape 2d. Cubixow: %d.\n\n", (int)cubixons_3d.size());
     for (unsigned int i = 0; i < cubixons_3d.size(); ++i) {
         Cubixon& cub = cubixons_3d[i];
         for (unsigned int j = 0; j < cub.colors.size(); ++j) {
@@ -112,10 +157,14 @@ void Cube::print(std::ostream& os) const {
     os << "Wypisuje kostke:\n";
     for (unsigned int i = 0; i < faces_2d.size(); ++i)
         os << faces_2d[i].to_string(i+1);
-    os << "\n";
 }
 
 void Cube::print_cubixons() const {
-    for (int i = 0; i < 27; ++i)
-        printf("%d ", i), cubixons_3d[i].println();
+    for (int i = 0; i < 27; ++i) {
+        printf("%d ", i);
+        cubixons_3d[i].println((i <= 9) ? true : false);
+        if (i == 8 || i == 17 || i == 26)
+            printf("\n");
+    }
+    printf("\n");
 }
