@@ -1,4 +1,3 @@
-#include "rubik.h"
 #include "face_2d.h"
 #include "cube.h"
 
@@ -35,14 +34,12 @@ Cube load_cube_from_input() {
 }
 
 Cube load_cube_from_file_or_input() {
-    Cube c;
     try {
-        c = load_cube_from_file();
+        return load_cube_from_file();
     }
     catch (...) {
-        c = load_cube_from_input();
+        return load_cube_from_input();
     }
-    return c;
 }
 
 template<class T>
@@ -52,9 +49,10 @@ auto operator<<(std::ostream& os, const T& t) -> decltype(t.print(os), os) {
 }
 
 int main() {
-    Cube c;
     try {
-        c = load_cube_from_file_or_input();
+        Cube c = load_cube_from_file_or_input();
+        std::cout << c;
+        c.cubixons_to_faces();
         std::cout << c;
     }
     catch (...) {
