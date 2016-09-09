@@ -6,7 +6,7 @@
 
 std::string Face_2d::colors_to_string() const {
     std::string s;
-    for (int i = 0; i < FACE_2D_FIELDS_NUM; ++i)
+    for (unsigned int i = 0; i < FACE_2D_FIELDS_NUM; ++i)
         s += color_to_char(colors[i]);
     return s;
 }
@@ -16,7 +16,7 @@ Face_2d::Face_2d(std::vector<char> v) {
     if (v.size() != FACE_2D_FIELDS_NUM)
         throw new std::runtime_error("Invalid 2d face");
 
-    for (int i = 0; i < FACE_2D_FIELDS_NUM; ++i)
+    for (unsigned int i = 0; i < FACE_2D_FIELDS_NUM; ++i)
         colors[i] = char_to_color(v[i]);
 }
 

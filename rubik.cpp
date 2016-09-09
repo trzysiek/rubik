@@ -15,13 +15,13 @@ Cube load_cube_from_file() {
     std::string face;
     const unsigned int face_nr = 6;
     std::vector<Face_2d> faces;
-    for (int i = 0; i < face_nr; ++i) {
+    for (unsigned int i = 0; i < face_nr; ++i) {
         file >> face;
         std::vector<char> v;
         if (face.size() != FACE_2D_FIELDS_NUM)
             throw new std::exception();
 
-        for (int j = 0; j < face.size(); ++j)
+        for (unsigned int j = 0; j < face.size(); ++j)
             v.push_back(face[j]);
         faces.push_back(Face_2d(v));
     }
