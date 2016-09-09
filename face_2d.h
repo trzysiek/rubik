@@ -7,13 +7,14 @@
 const unsigned int RUBIK_SIZE = 3;
 const unsigned int FACE_2D_FIELDS_NUM = RUBIK_SIZE * RUBIK_SIZE;
 
-enum Color {White, Yellow, Orange, Red, Green, Blue};
+enum Color {W, Y, O, R, G, B};
 
 class Face_2d {
-  private:
-    Color colors[FACE_2D_FIELDS_NUM];
   public:
+    Color colors[FACE_2D_FIELDS_NUM];
+
     Face_2d(std::vector<char> v);
+    Face_2d(std::string s);
     Face_2d() { Face_2d(std::vector<char> {}); }
     std::string to_string(int nr) const {
         return "Sciana nr " + std::to_string(nr) + ": " + colors_to_string() + '\n';
