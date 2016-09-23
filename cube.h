@@ -14,27 +14,26 @@ struct Cubixon {
     Color& operator[](int nr) {
         return colors[nr];
     }
-    void println(bool space) const {
-        const int spaces_nr = 10;
-
-        if (space) printf(" ");
-        int spaces = spaces_nr;
-        for (int i = 0; i < (int)colors.size(); ++i) {
-            printf("%c ", color_to_char(colors[i]));
-            spaces -= 2;
-        }
-        while (spaces --)
-            printf(" ");
+    bool operator==(const Cubixon& c) {
+        if (colors.size() != c.colors.size())
+            return false;
+        for (unsigned int i = 0; i < colors.size(); ++i)
+            if (!(colors[i] == c.colors[i]))
+                return false;
+        return true;
     }
+    void println(bool space) const;
 };
 
 
 class Cube {
   public:
+    // members
     std::vector<Face_2d> faces_2d; // list of faces (human-like represantation of cube)
     std::vector<Cubixon> cubixons_3d; // list of 27 (most likely) 1x1x1 cubixons
     std::vector<Face_2d> restr; // restrictions
 
+    // constructors
     Cube() {};
     Cube(std::vector<Face_2d> faces) : faces_2d(faces) {
         for (int i = 1; i <= 27; ++i)
@@ -44,25 +43,36 @@ class Cube {
         for (int i = 1; i <= 27; ++i)
             cubixons_3d.push_back(get_cubixon(c.faces_2d, i));
     }
-    Cube& operator=(Cube c) {
-        faces_2d = c.faces_2d;
-        cubixons_3d = c.cubixons_3d;
-        restr = c.restr;
-        return *this;
+
+    // operators
+    Cube& operator=(Cube &c) = default;
+    bool operator==(const Cube& c) {
+        if (cubixons_3d.size() != c.cubixons_3d.size())
+            return false;
+        for (unsigned int i = 0; i < cubixons_3d.size(); ++i)
+            if (!(cubixons_3d[i] == c.cubixons_3d[i]))
+                return false;
+        return true;
     }
 
-    // perform one single turn
+    // algorithms
     static Cube move(Cube c, int turn_nr);
     int bfs(std::vector<Face_2d> restr);
     int bfs();
 
-    void print(std::ostream& os) const;
+    // printing
+    friend std::ostream& operator<<(std::ostream&, const Cube&);
     void print_cubixons() const;
+    static std::string to_string(const Cube&);
+    std::string to_string() const;
 
+    // random stuff
     void cubixons_to_faces();
     void move_cubixon(unsigned int a, unsigned int b);
 
-    Cube get_default_cube();
+    static Cube get_default_cube();
+
+    static const std::string default_cubixon_to_string;
 
   private:
     int hash();

@@ -53,11 +53,10 @@ int main() {
         Cube c = load_cube_from_file_or_input();
         std::cout << c;
         //c.print_cubixons();
-        Cube d = Cube::move(c, 1);
-        //d.print_cubixons();
+        //Cube d = Cube::move(c, 1);
         //c.print_cubixons();
         //c.cubixons_to_faces();
-        std::cout << d << " bfs: " << d.bfs() << std::endl;
+        std::cout << " \nbfs: " << c.bfs() << std::endl;
     }
     catch (...) {
         std::cerr << "Error in loading cube." << std::endl;

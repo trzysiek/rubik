@@ -2,10 +2,16 @@
 #include "util.h"
 #include "turn.h"
 
-#include <queue>
-#include <map>
-
 const unsigned int Cube::TURN_CUBIXONS_NUM = 8;
+const std::string Cube::default_cubixon_to_string {
+    "Sciana nr 0: YYY YYY YYY\n"
+    "Sciana nr 1: RRR WRB YYY\n"
+    "Sciana nr 2: YYY YYY YYY\n"
+    "Sciana nr 3: YYY YYY YYY\n"
+    "Sciana nr 4: YYY YYY YYY\n"
+    "Sciana nr 5: YYY YYY YYY\n"
+};
+    
 
 std::vector<std::vector<std::pair<int, int>>> Cube::cubixons_to_2d = {
     {{0, 0}, {2, 0}, {4, 2}},
@@ -39,15 +45,19 @@ std::vector<std::vector<std::pair<int, int>>> Cube::cubixons_to_2d = {
     {{1, 8}, {3, 6}, {5, 2}}
 };
 
+// move cubixon from position a to position b
 void Cube::move_cubixon(unsigned int a, unsigned int b) {
     unsigned int size = cubixons_3d[a].colors.size();
     cubixons_3d[b].colors.resize(size);
+    //std::cout << a << " " << b << std::endl;
     auto which = Turn::move_table.table.at({a, b});
     for (unsigned int i = 0; i < size; ++i) {
         cubixons_3d[b][which[i]] = cubixons_3d[a][i];
     }
 }
 
+// Performs one single turn. Might be too slow later on,
+// as it's not very well optimized.
 Cube Cube::move(Cube c, int turn_nr) {
     std::vector<int> turn;
     if (turn_nr == 1)
@@ -81,34 +91,8 @@ Cube Cube::move(Cube c, int turn_nr) {
     return cube;
 }
 
-int Cube::bfs(std::vector<Face_2d> restr) {
-    std::map<int, int> dist;
-    std::queue<Cube> q;
-
-    q.push(*this);
-    dist[hash()] = 0;
-    while (!q.empty()) {
-        Cube c = q.front(); q.pop();
-        std::cerr << c.hash() << ", " << dist[c.hash()] << std::endl;
-        c.print_cubixons();
-        for (unsigned int i = 1; i <= 1; ++i) {
-            Cube c_t = Cube::move(c, i);
-            int h = c_t.hash();
-            if (dist.count(h) == 0) {
-                dist[h] = dist[c.hash()] + 1;
-                q.push(c_t);
-            }
-            else
-                std::cerr << "cant: " << h << std::endl;
-        }
-    }
-    return 101;
-}
-
-int Cube::bfs() {
-    return bfs({});
-}
-
+// Returns hash of a entire cube.
+// Might want to change it to LL or something.
 int Cube::hash() {
     static const int P = 97;
 
@@ -153,10 +137,24 @@ void Cube::cubixons_to_faces() {
     }
 }
 
-void Cube::print(std::ostream& os) const {
+void Cubixon::println(bool space) const {
+    const int spaces_nr = 10;
+
+    if (space) printf(" ");
+    int spaces = spaces_nr;
+    for (int i = 0; i < (int)colors.size(); ++i) {
+        printf("%c", color_to_char(colors[i]));
+        spaces--;
+    }
+    while (spaces --)
+        printf(" ");
+}
+
+std::ostream& operator<<(std::ostream& os, const Cube& c) {
     os << "Wypisuje kostke:\n";
-    for (unsigned int i = 0; i < faces_2d.size(); ++i)
-        os << faces_2d[i].to_string(i+1);
+    for (unsigned int i = 0; i < c.faces_2d.size(); ++i)
+        os << c.faces_2d[i].to_string(i+1);
+    return os;
 }
 
 void Cube::print_cubixons() const {
@@ -167,4 +165,15 @@ void Cube::print_cubixons() const {
             printf("\n");
     }
     printf("\n");
+}
+
+std::string Cube::to_string(const Cube& c) {
+    std::string str;
+    for (unsigned int i = 0; i < c.faces_2d.size(); ++i)
+        str += c.faces_2d[i].to_string(i+1);
+    return str;
+}
+
+std::string Cube::to_string() const {
+    return Cube::to_string(*this);
 }
